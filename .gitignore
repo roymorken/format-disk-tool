@@ -1,0 +1,14 @@
+# Byggeutdata
+*.exe
+
+# Sertifikater / nøkler (skal ALDRI committes)
+*.pfx
+*.cer
+*.crt
+*.key
+*.p12
+
+# Midlertidige filer
+*.tmp
+*.log
+scratchpad/
