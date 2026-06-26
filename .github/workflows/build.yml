@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build FormatDiskTool.exe
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ps2exe
+        shell: pwsh
+        run: Install-Module ps2exe -Scope CurrentUser -Force
+
+      - name: Build executable
+        shell: pwsh
+        run: |
+          Import-Module ps2exe
+          Invoke-ps2exe `
+            -inputFile  'FormatDiskTool.ps1' `
+            -outputFile 'FormatDiskTool.exe' `
+            -requireAdmin `
+            -noConsole `
+            -title   'Format Disk Tool' `
+            -product 'Format Disk Tool'
+
+      - name: Verify artifact exists
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'FormatDiskTool.exe')) {
+            throw 'Build failed: FormatDiskTool.exe was not produced.'
+          }
+          Get-Item 'FormatDiskTool.exe' | Format-List Name, Length, LastWriteTime
+
+      - name: Upload unsigned artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormatDiskTool-unsigned
+          path: FormatDiskTool.exe
+          if-no-files-found: error
